@@ -1,0 +1,28 @@
+{
+  "name": "aws-getting-started",
+  "version": "1.0.0",
+  "description": "Learning",
+  "homepage": "https://github.com/tomasossa/aws-getting-started#readme",
+  "bugs": {
+    "url": "https://github.com/tomasossa/aws-getting-started/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tomasossa/aws-getting-started.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest src"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@jest/globals": "^30.1.2",
+    "eslint": "^9.36.0",
+    "jest": "^30.1.3",
+    "ts-jest": "^29.4.4",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.44.0"
+  }
+}
