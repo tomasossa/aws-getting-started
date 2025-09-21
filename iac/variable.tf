@@ -1,11 +1,12 @@
-variable "instance_name" {
-  description = "Value of the EC2 instance's Name tag."
+variable "aws_region" {
+  description = "The AWS region to deploy resources in."
   type        = string
-  default     = "learn-terraform"
+  default     = "sa-east-1"
 }
 
-variable "instance_type" {
-  description = "The EC2 instance's type."
+variable "task_definition_name" {
+  description = "The name of the ECS task definition."
   type        = string
-  default     = "t3.micro"
+  default     = "learn-terraform-task"
 }
+

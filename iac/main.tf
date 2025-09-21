@@ -1,23 +1,53 @@
 provider "aws" {
-  region = "sa-east-1"
+  region = var.aws_region
 }
 
-data "aws_ami" "ubuntu" {
-  most_recent = true
+resource "random_pet" "container" {}
 
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
+resource "aws_ecr_repository" "repo" {
+  name = "tf-aws-getting-started"
+
+  provisioner "local-exec" {
+    command     = <<-EOT
+      aws ecr get-login-password | docker login --username AWS --password-stdin ${self.repository_url}
+      docker build -t tf-aws-getting-started .
+      docker tag tf-aws-getting-started:latest ${self.repository_url}:latest
+      docker push ${self.repository_url}:latest
+    EOT
+    working_dir = "../"
   }
-
-  owners = ["099720109477"] # Canonical
 }
 
-resource "aws_instance" "app_server" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type
+resource "aws_ecs_cluster" "default" {
+  name = "default-cluster"
+}
 
-  tags = {
-    Name = var.instance_name
-  }
+resource "aws_cloudwatch_log_group" "ecs_log_group" {
+  name              = "/ecs/${var.task_definition_name}"
+  retention_in_days = 7
+}
+
+resource "aws_ecs_task_definition" "app" {
+  family                   = var.task_definition_name
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = "512"
+  memory                   = "1024"
+  execution_role_arn       = "arn:aws:iam::029011216774:role/ecsTaskExecutionRole"
+
+  container_definitions = jsonencode([
+    {
+      name      = random_pet.container.id
+      image     = aws_ecr_repository.repo.repository_url
+      essential = true
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.ecs_log_group.name
+          awslogs-stream-prefix = "ecs"
+          awslogs-region        = var.aws_region
+        }
+      }
+    }
+  ])
 }
